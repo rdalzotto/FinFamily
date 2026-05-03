@@ -243,7 +243,12 @@ input,select,button{font-family:inherit;}
         <div class="chip" onclick="simularVoz('pagué farmacia tres mil')">3000 farmacia</div>
       </div></div>
     </div>
-    <div class="sec-title" id="txTitle">Últimas transacciones</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+  <button onclick="cambiarMes(-1)" style="background:var(--verde3);border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;color:var(--verde);">‹</button>
+  <div style="flex:1;text-align:center;font-size:14px;font-weight:600;color:var(--texto)" id="mesTitulo">Mayo 2026</div>
+  <button onclick="cambiarMes(1)" id="btnMesSig" style="background:var(--verde3);border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;color:var(--verde);">›</button>
+</div>
+<div class="sec-title" id="txTitle">Últimas transacciones</div>
     <div id="txList"></div>
   </div>
   <div class="screen" id="screen-gastos"><div class="sec-title">Por categoría — este mes</div><div id="catAnalisis"></div></div>
@@ -310,7 +315,7 @@ let vozActiva=false,vozPendiente=null,reconocimiento=null;
 let movs=JSON.parse(localStorage.getItem('ff_movs')||'[]');
 let tc=parseFloat(localStorage.getItem('ff_tc')||'1200');
 let scriptUrl=localStorage.getItem('ff_script_url')||SCRIPT_URL;
-let usuarioActual='',rolActual='';
+let usuarioActual='',rolActual='',mesOffset=0;
 
 // CORRECCION FECHA: soporta DD/MM/AAAA (Google Sheets Argentina) y AAAA-MM-DD (ISO)
 function parseFecha(s){
@@ -363,7 +368,7 @@ function updMonBtns(){document.getElementById('bARS').className='m-btn'+(moneda=
 function guardar(){var imp=parseFloat(document.getElementById('fImporte').value);if(!catSel||isNaN(imp)||imp<=0){alert('Completá la categoría y el importe');return;}var info=getSubcatInfo(catSel);var mov={id:editId||Date.now(),tipo,catId:catSel,cat:info.cat,subcat:info.subcat,icon:info.icon,detalle:document.getElementById('fDetalle').value||info.subcat,moneda,importe:imp,importeARS:moneda==='USD'?imp*tc:imp,quien:usuarioActual,fecha:document.getElementById('fFecha').value};if(editId)movs=movs.map(m=>m.id===editId?mov:m);else movs.unshift(mov);localStorage.setItem('ff_movs',JSON.stringify(movs));closeModal();calcResumen();renderTx();renderCatAnal();setSyncStatus('loading','Guardando...');enviarASheets(editId?'editar':'agregar',mov).then(()=>setSyncStatus('ok','Guardado ✓')).catch(()=>setSyncStatus('err','Error'));}
 function eliminar(id){if(!confirm('¿Eliminar?'))return;movs=movs.filter(m=>m.id!==id);localStorage.setItem('ff_movs',JSON.stringify(movs));calcResumen();renderTx();renderCatAnal();enviarASheets('eliminar',{id}).then(()=>setSyncStatus('ok','Eliminado ✓')).catch(()=>{});}
 function calcResumen(){
-  var now=new Date(),mes=now.getMonth(),anio=now.getFullYear();
+  var now=new Date(),ref=new Date(now.getFullYear(),now.getMonth()+mesOffset,1),mes=ref.getMonth(),anio=ref.getFullYear();
   // USA parseFecha para soportar DD/MM/AAAA de Sheets
   var dm=movs.filter(m=>{var d=parseFecha(m.fecha);return d.getMonth()===mes&&d.getFullYear()===anio;});
   var ing=dm.filter(m=>m.tipo==='ingreso').reduce((s,m)=>s+m.importeARS,0);
@@ -373,13 +378,15 @@ function calcResumen(){
   if(rolActual==='admin'){document.getElementById('totIng').textContent=fARS(ing);document.getElementById('totGas').textContent=fARS(gas);document.getElementById('ingUSD').textContent='USD '+Math.round(ing/tc).toLocaleString('es-AR');document.getElementById('gasUSD').textContent='USD '+Math.round(gas/tc).toLocaleString('es-AR');document.getElementById('saldo').textContent=fARS(saldo);document.getElementById('pctAhorro').textContent=pct+'%';document.getElementById('fondoBar').style.width=pctFondo+'%';document.getElementById('fondoMonto').textContent=fARS(Math.max(0,saldo))+' ARS';document.getElementById('fondoMeta').textContent='Meta: '+fARS(metaFondo)+' — '+pctFondo+'%';}
 }
 function renderTx(){
-  var lista=rolActual==='hijo'?movs.filter(m=>m.quien===usuarioActual):movs;
-  lista=lista.slice(0,20);
+  var now=new Date(),ref=new Date(now.getFullYear(),now.getMonth()+mesOffset,1),mes=ref.getMonth(),anio=ref.getFullYear();
+  var lista=movs.filter(m=>{var d=parseFecha(m.fecha);return d.getMonth()===mes&&d.getFullYear()===anio;});
+  if(rolActual==='hijo')lista=lista.filter(m=>m.quien===usuarioActual);
+  lista=lista.slice(0,50);
   if(!lista.length){document.getElementById('txList').innerHTML='<div class="empty"><div class="icon">📋</div>Todavía no hay movimientos.<br>Usá el 🎙️ o el + para cargar.</div>';return;}
   document.getElementById('txList').innerHTML=lista.map(m=>'<div class="tx-item"><div class="tx-icon '+m.tipo+'">'+( m.icon||'📌')+'</div><div class="tx-info"><div class="tx-cat">'+(m.subcat||m.cat)+'</div><div class="tx-sub">'+m.detalle+' · '+(USUARIOS_INFO[m.quien]?USUARIOS_INFO[m.quien].nombre:m.quien)+' · '+fFecha(m.fecha)+'</div></div><div class="tx-right"><div class="tx-val '+m.tipo+'">'+( m.tipo==='gasto'?'−':'+')+fNum(m.importe)+' '+m.moneda+'</div>'+(m.moneda==='USD'?'<div class="tx-cur">'+fARS(m.importeARS)+'</div>':'')+'<div class="tx-actions"><button class="tx-btn ed" onclick="openModal('+ m.id+')">✏️</button>'+(rolActual==='admin'?'<button class="tx-btn del" onclick="eliminar('+ m.id+')">🗑️</button>':'')+'</div></div></div>').join('');
 }
 function renderCatAnal(){
-  var now=new Date(),mes=now.getMonth(),anio=now.getFullYear();
+  var now=new Date(),ref=new Date(now.getFullYear(),now.getMonth()+mesOffset,1),mes=ref.getMonth(),anio=ref.getFullYear();
   // USA parseFecha para soportar DD/MM/AAAA de Sheets
   var gas=movs.filter(m=>m.tipo==='gasto'&&parseFecha(m.fecha).getMonth()===mes&&parseFecha(m.fecha).getFullYear()===anio);
   if(!gas.length){document.getElementById('catAnalisis').innerHTML='<div class="empty"><div class="icon">📊</div>Cargá gastos para ver el análisis.</div>';return;}
@@ -391,6 +398,17 @@ function renderCatAnal(){
 function guardarConfig(){tc=parseFloat(document.getElementById('cfgTC').value)||1200;scriptUrl=document.getElementById('cfgScriptUrl').value.trim()||SCRIPT_URL;localStorage.setItem('ff_tc',tc);localStorage.setItem('ff_script_url',scriptUrl);alert('✅ Configuración guardada');calcResumen();}
 function fARS(n){return '$'+Math.round(n).toLocaleString('es-AR');}
 function fNum(n){return n.toLocaleString('es-AR',{minimumFractionDigits:0,maximumFractionDigits:2});}
+function cambiarMes(dir){
+  var now=new Date(),futuro=new Date(now.getFullYear(),now.getMonth()+mesOffset+dir,1);
+  if(futuro>now&&dir>0)return;
+  mesOffset+=dir;
+  var ref=new Date(now.getFullYear(),now.getMonth()+mesOffset,1);
+  var meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('mesTitulo').textContent=meses[ref.getMonth()]+' '+ref.getFullYear();
+  document.getElementById('btnMesSig').style.opacity=mesOffset===0?'0.3':'1';
+  document.getElementById('btnMesSig').disabled=mesOffset===0;
+  calcResumen();renderTx();renderCatAnal();
+}
 initApp();
 </script>
 </body>
