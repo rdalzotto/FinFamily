@@ -142,6 +142,44 @@ input,select,button{font-family:inherit;}
 .pill.m{background:#FAEEDA;color:#633806;}
 .pill.a{background:var(--rojo2);color:#712B13;}
 
+/* FONDO DE EMERGENCIA */
+.fondo-hero{background:linear-gradient(135deg,#085041,#0F6E56);border-radius:14px;padding:18px;margin-bottom:10px;color:white;}
+.fondo-hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.fondo-titulo{font-size:13px;font-weight:600;opacity:0.85;margin-bottom:2px;}
+.fondo-meses{font-size:28px;font-weight:700;}
+.fondo-meses span{font-size:13px;font-weight:400;opacity:0.7;}
+.fondo-estado{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.fondo-estado.ok{background:rgba(93,202,165,0.3);color:#9FE1CB;}
+.fondo-estado.warn{background:rgba(186,117,23,0.3);color:#EF9F27;}
+.fondo-estado.danger{background:rgba(216,90,48,0.3);color:#F0997B;}
+.fondo-bar-wrap{height:8px;background:rgba(255,255,255,0.2);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+.fondo-bar-fill{height:100%;border-radius:4px;transition:width 0.6s ease;}
+.fondo-detalle{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;}
+.fondo-det-item{background:rgba(255,255,255,0.1);border-radius:8px;padding:8px;text-align:center;}
+.fondo-det-lbl{font-size:9px;opacity:0.65;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.4px;}
+.fondo-det-val{font-size:13px;font-weight:600;}
+.fondo-consejo{background:white;border-radius:10px;padding:12px;font-size:12px;color:var(--texto2);line-height:1.6;margin-bottom:10px;}
+.fondo-consejo strong{color:var(--texto);}
+
+/* ANÁLISIS COMPARATIVO */
+.comp-card{background:white;border-radius:10px;padding:12px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,0.07);}
+.comp-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--gris);}
+.comp-row:last-child{border-bottom:none;}
+.comp-cat{font-size:12px;color:var(--texto);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.comp-val{font-size:12px;font-weight:600;min-width:72px;text-align:right;}
+.comp-delta{font-size:11px;min-width:52px;text-align:right;font-weight:500;}
+.comp-delta.sube{color:var(--rojo);}
+.comp-delta.baja{color:var(--verde);}
+.comp-delta.igual{color:var(--texto2);}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.kpi-card{background:white;border-radius:10px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,0.07);}
+.kpi-lbl{font-size:10px;color:var(--texto2);font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.4px;}
+.kpi-val{font-size:20px;font-weight:700;color:var(--texto);}
+.kpi-sub{font-size:11px;color:var(--texto2);margin-top:2px;}
+.kpi-delta{font-size:11px;font-weight:600;margin-top:3px;}
+.kpi-delta.pos{color:var(--verde);}
+.kpi-delta.neg{color:var(--rojo);}
+
 /* CONFIG */
 .cfg-card{background:white;border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.07);}
 .cfg-card h4{font-size:14px;font-weight:600;margin-bottom:6px;}
@@ -325,29 +363,67 @@ input,select,button{font-family:inherit;}
     <!-- RESUMEN -->
     <div class="screen" id="screen-resumen">
       <div class="sec-title" id="resumenMesTitulo">Resumen — Mayo 2026</div>
-      <div class="res-grid">
-        <div class="res-card ing"><div class="rc-lbl">💰 INGRESOS</div><div class="rc-val" id="resIng">$0</div><div style="font-size:10px;color:var(--verde4);opacity:0.7" id="resIngUSD">USD 0</div></div>
-        <div class="res-card gas"><div class="rc-lbl">💸 GASTOS</div><div class="rc-val" id="resGas">$0</div><div style="font-size:10px;color:var(--rojo);opacity:0.7" id="resGasUSD">USD 0</div></div>
-      </div>
-      <div style="background:white;border-radius:10px;padding:12px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.07);">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div><div style="font-size:10px;color:var(--texto2);font-weight:600;">SALDO NETO</div><div style="font-size:24px;font-weight:700;" id="resSaldo">$0</div></div>
-          <div style="text-align:right;"><div style="font-size:10px;color:var(--texto2);font-weight:600;">AHORRO</div><div style="font-size:24px;font-weight:700;color:var(--verde)" id="resPct">0%</div></div>
+
+      <!-- KPIs comparativos -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-lbl">💰 Ingresos</div>
+          <div class="kpi-val" id="resIng">$0</div>
+          <div class="kpi-sub" id="resIngUSD">USD 0</div>
+          <div class="kpi-delta" id="resIngDelta"></div>
         </div>
-        <div style="margin-top:8px;"><div style="font-size:10px;color:var(--texto2);margin-bottom:3px;">Fondo emergencia</div>
-          <div style="height:6px;background:var(--gris2);border-radius:3px;overflow:hidden;"><div id="resFondoBar" style="height:100%;background:var(--verde2);border-radius:3px;width:0%"></div></div>
-          <div style="font-size:10px;color:var(--texto2);margin-top:3px;" id="resFondoMeta"></div>
+        <div class="kpi-card">
+          <div class="kpi-lbl">💸 Gastos</div>
+          <div class="kpi-val" id="resGas">$0</div>
+          <div class="kpi-sub" id="resGasUSD">USD 0</div>
+          <div class="kpi-delta" id="resGasDelta"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-lbl">📊 Saldo neto</div>
+          <div class="kpi-val" id="resSaldo">$0</div>
+          <div class="kpi-delta" id="resSaldoDelta"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-lbl">💹 % Ahorro</div>
+          <div class="kpi-val" id="resPct" style="color:var(--verde)">0%</div>
+          <div class="kpi-delta" id="resPctDelta"></div>
         </div>
       </div>
-      <div class="sec-title">Por categoría</div><div id="resCatAnal"></div>
-      <div class="sec-title">Dónde invertir</div>
-      <div class="inv-card">
-        <div class="inv-row"><div class="inv-icon" style="background:#E1F5EE">📈</div><div class="inv-info"><h5>FCI Money Market en USD</h5><p>Liquidez inmediata, rendimiento en dólares.</p><span class="pill b">Riesgo bajo</span></div></div>
-        <div class="inv-row"><div class="inv-icon" style="background:#FAEEDA">🏦</div><div class="inv-info"><h5>Plazo fijo UVA</h5><p>Ajusta por inflación. Para ahorros en pesos a 90+ días.</p><span class="pill m">Riesgo medio</span></div></div>
-        <div class="inv-row"><div class="inv-icon" style="background:#E6F1FB">🏠</div><div class="inv-info"><h5>Propiedades en alquiler</h5><p>Ya tenés experiencia. Buena cobertura contra inflación.</p><span class="pill b">Riesgo bajo</span></div></div>
-        <div class="inv-row"><div class="inv-icon" style="background:#FAECE7">💵</div><div class="inv-info"><h5>Dólar MEP / billete</h5><p>Guardá al menos 20% del ahorro en dólares.</p><span class="pill b">Riesgo bajo</span></div></div>
-        <div class="inv-row"><div class="inv-icon" style="background:#E1F5EE">📊</div><div class="inv-info"><h5>CEDEARs</h5><p>Acciones globales en pesos desde Argentina.</p><span class="pill a">Riesgo alto</span></div></div>
+
+      <!-- Fondo de emergencia -->
+      <div class="sec-title">🛡️ Fondo de emergencia</div>
+      <div class="fondo-hero">
+        <div class="fondo-hero-top">
+          <div>
+            <div class="fondo-titulo">Meses cubiertos</div>
+            <div class="fondo-meses" id="fondoMesesCubiertos">0 <span>/ <span id="fondoMetaMeses">3</span> meses</span></div>
+          </div>
+          <div class="fondo-estado" id="fondoEstadoBadge">—</div>
+        </div>
+        <div class="fondo-bar-wrap">
+          <div class="fondo-bar-fill" id="resFondoBar" style="width:0%;background:#5DCAA5"></div>
+        </div>
+        <div class="fondo-detalle">
+          <div class="fondo-det-item"><div class="fondo-det-lbl">Ahorro acum.</div><div class="fondo-det-val" id="fondoAhorro">$0</div></div>
+          <div class="fondo-det-item"><div class="fondo-det-lbl">Meta</div><div class="fondo-det-val" id="fondoMeta">$0</div></div>
+          <div class="fondo-det-item"><div class="fondo-det-lbl">Faltan</div><div class="fondo-det-val" id="fondoFaltan">$0</div></div>
+        </div>
       </div>
+      <div class="fondo-consejo" id="fondoConsejo"></div>
+
+      <!-- Gastos por categoría vs mes anterior -->
+      <div class="sec-title">📊 Gastos por categoría</div>
+      <div id="resCatAnal"></div>
+
+      <!-- Comparación vs mes anterior -->
+      <div class="sec-title" id="compTitulo" style="display:none">📈 vs mes anterior</div>
+      <div class="comp-card" id="compCard" style="display:none">
+        <div id="compRows"></div>
+      </div>
+
+      <!-- Inversiones dinámicas -->
+      <div class="sec-title">💡 Recomendaciones</div>
+      <div class="inv-card" id="invCard"></div>
     </div>
 
     <!-- ANUAL -->
@@ -382,6 +458,9 @@ input,select,button{font-family:inherit;}
       <div class="cfg-card" id="cfgAdminOnly">
         <h4>💱 Tipo de cambio USD</h4>
         <input type="number" class="form-input" id="cfgTC" value="1200" style="margin-top:6px">
+        <h4 style="margin-top:12px">🛡️ Meta fondo de emergencia</h4>
+        <div style="font-size:11px;color:var(--texto2);margin:4px 0 4px">Meses de gastos a cubrir (recomendado: 3 a 6)</div>
+        <input type="number" class="form-input" id="cfgMesesFondo" value="3" min="1" max="12" style="margin-top:0">
         <h4 style="margin-top:12px">🔗 URL Google Apps Script</h4>
         <input type="text" class="form-input" id="cfgScriptUrl" style="font-size:11px;margin-top:6px">
         <button class="save-btn" onclick="guardarConfig()">Guardar configuración</button>
@@ -500,6 +579,7 @@ let vozActiva = false, vozPendiente = null, reconocimiento = null;
 let movs = JSON.parse(localStorage.getItem('ff_movs') || '[]');
 let tc = parseFloat(localStorage.getItem('ff_tc') || '1200');
 let scriptUrl = localStorage.getItem('ff_script_url') || SCRIPT_URL;
+let mesesFondoMeta = parseInt(localStorage.getItem('ff_meses_fondo') || '3');
 let usuarioActual = '', rolActual = '', mesOffset = 0, anioOffset = 0;
 
 // =============================================
@@ -684,6 +764,7 @@ function iniciarAppConUsuario() {
   document.getElementById('fFecha').value = now.toISOString().split('T')[0];
   document.getElementById('cfgTC').value = tc;
   document.getElementById('cfgScriptUrl').value = scriptUrl;
+  document.getElementById('cfgMesesFondo').value = mesesFondoMeta;
 
   initVoz();
   // Mostrar datos locales inmediatamente
@@ -884,33 +965,180 @@ function renderCatAnal() {
 function renderResumenMensual() {
   var f = getMesFiltro(), mes = f.mes, anio = f.anio;
   var meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  var tit = document.getElementById('resumenMesTitulo'); if (tit) tit.textContent = 'Resumen — ' + meses[mes] + ' ' + anio;
+  var tit = document.getElementById('resumenMesTitulo');
+  if (tit) tit.textContent = 'Resumen — ' + meses[mes] + ' ' + anio;
+
+  // Mes actual
   var dm = movs.filter(m => { var d = parseFecha(m.fecha); return d && d.getMonth() === mes && d.getFullYear() === anio; });
   var ing = dm.filter(m => m.tipo === 'ingreso').reduce((s,m) => s+m.importeARS, 0);
   var gas = dm.filter(m => m.tipo === 'gasto').reduce((s,m) => s+m.importeARS, 0);
   var saldo = ing - gas, pct = ing > 0 ? Math.round((saldo/ing)*100) : 0;
-  var metaFondo = gas * 3, pctFondo = metaFondo > 0 ? Math.min(100, Math.round((Math.max(0,saldo)/metaFondo)*100)) : 0;
-  var set = (id, val) => { var el = document.getElementById(id); if (el) el.textContent = val; };
-  set('resIng', fARS(ing)); set('resGas', fARS(gas));
+
+  // Mes anterior
+  var refAnt = new Date(anio, mes - 1, 1);
+  var mesAnt = refAnt.getMonth(), anioAnt = refAnt.getFullYear();
+  var dma = movs.filter(m => { var d = parseFecha(m.fecha); return d && d.getMonth() === mesAnt && d.getFullYear() === anioAnt; });
+  var ingAnt = dma.filter(m => m.tipo === 'ingreso').reduce((s,m) => s+m.importeARS, 0);
+  var gasAnt = dma.filter(m => m.tipo === 'gasto').reduce((s,m) => s+m.importeARS, 0);
+  var saldoAnt = ingAnt - gasAnt, pctAnt = ingAnt > 0 ? Math.round((saldoAnt/ingAnt)*100) : 0;
+  var hayAnt = dma.length > 0;
+
+  function deltaHtml(actual, anterior, invertido) {
+    if (!hayAnt || anterior === 0) return '';
+    var diff = actual - anterior;
+    var pctD = Math.round((diff / anterior) * 100);
+    var sube = diff > 0;
+    var bueno = invertido ? !sube : sube;
+    var cls = pctD === 0 ? '' : (bueno ? 'pos' : 'neg');
+    var arrow = pctD === 0 ? '→' : (sube ? '▲' : '▼');
+    return '<div class="kpi-delta ' + cls + '">' + arrow + ' ' + Math.abs(pctD) + '% vs ' + meses[mesAnt].substring(0,3) + '</div>';
+  }
+
+  var set = (id, html) => { var el = document.getElementById(id); if (el) el.innerHTML = html; };
+  set('resIng', fARS(ing));
+  set('resGas', fARS(gas));
   set('resIngUSD', 'USD ' + Math.round(ing/tc).toLocaleString('es-AR'));
   set('resGasUSD', 'USD ' + Math.round(gas/tc).toLocaleString('es-AR'));
-  var rs = document.getElementById('resSaldo'); if (rs) { rs.textContent = fARS(saldo); rs.style.color = saldo >= 0 ? 'var(--verde)' : 'var(--rojo)'; }
-  set('resPct', pct + '%');
-  var rfb = document.getElementById('resFondoBar'); if (rfb) rfb.style.width = pctFondo + '%';
-  set('resFondoMeta', 'Meta: ' + fARS(metaFondo) + ' (' + pctFondo + '% alcanzado)');
+  var rs = document.getElementById('resSaldo');
+  if (rs) { rs.textContent = fARS(saldo); rs.style.color = saldo >= 0 ? 'var(--verde)' : 'var(--rojo)'; }
+  var rp = document.getElementById('resPct');
+  if (rp) { rp.textContent = pct + '%'; rp.style.color = pct >= 20 ? 'var(--verde)' : pct >= 10 ? '#BA7517' : 'var(--rojo)'; }
+  set('resIngDelta', deltaHtml(ing, ingAnt, false));
+  set('resGasDelta', deltaHtml(gas, gasAnt, true));
+  set('resSaldoDelta', deltaHtml(saldo, saldoAnt, false));
+  set('resPctDelta', deltaHtml(pct, pctAnt, false));
+
+  // ── FONDO DE EMERGENCIA ──
+  mesesFondoMeta = parseInt(localStorage.getItem('ff_meses_fondo') || '3');
+  var gasPromedio = gas > 0 ? gas : (gasAnt > 0 ? gasAnt : 0);
+  var saldoAcum = movs.reduce((s, m) => m.tipo === 'ingreso' ? s + m.importeARS : s - m.importeARS, 0);
+  var fondoDisponible = Math.max(0, saldoAcum);
+  var metaFondo = gasPromedio * mesesFondoMeta;
+  var mesesCubiertos = gasPromedio > 0 ? Math.min(mesesFondoMeta + 1, fondoDisponible / gasPromedio) : 0;
+  var pctFondo = metaFondo > 0 ? Math.min(100, Math.round((fondoDisponible / metaFondo) * 100)) : 0;
+  var faltan = Math.max(0, metaFondo - fondoDisponible);
+
+  set('fondoMesesCubiertos', mesesCubiertos.toFixed(1));
+  set('fondoMetaMeses', mesesFondoMeta);
+  set('fondoAhorro', fARS(fondoDisponible));
+  set('fondoMeta', fARS(metaFondo));
+  set('fondoFaltan', faltan > 0 ? fARS(faltan) : '✓ Listo');
+
+  var bar = document.getElementById('resFondoBar');
+  if (bar) {
+    bar.style.width = pctFondo + '%';
+    bar.style.background = pctFondo >= 100 ? '#5DCAA5' : pctFondo >= 50 ? '#EF9F27' : '#D85A30';
+  }
+  var badge = document.getElementById('fondoEstadoBadge');
+  if (badge) {
+    if (pctFondo >= 100) { badge.textContent = '✓ Completo'; badge.className = 'fondo-estado ok'; }
+    else if (pctFondo >= 50) { badge.textContent = '⚠ En progreso'; badge.className = 'fondo-estado warn'; }
+    else { badge.textContent = '🔴 Bajo'; badge.className = 'fondo-estado danger'; }
+  }
+  var consejo = document.getElementById('fondoConsejo');
+  if (consejo) {
+    if (gasPromedio === 0) {
+      consejo.innerHTML = '<strong>💡 Tip:</strong> Cargá gastos del mes para ver el cálculo del fondo.';
+    } else if (pctFondo >= 100) {
+      consejo.innerHTML = '<strong>🎉 ¡Fondo completo!</strong> Cubrís ' + mesesFondoMeta + ' meses de gastos. Podés invertir el excedente — mirá las recomendaciones abajo.';
+    } else if (pctFondo >= 50) {
+      var mesesToDo = saldo > 0 ? ((metaFondo - fondoDisponible) / saldo).toFixed(1) : '—';
+      consejo.innerHTML = '<strong>📈 Buen avance.</strong> Con el ritmo actual, completás el fondo en aprox. <strong>' + mesesToDo + ' meses</strong>. Priorizá esto antes de invertir en activos de riesgo.';
+    } else {
+      consejo.innerHTML = '<strong>⚠️ Fondo bajo.</strong> Necesitás <strong>' + fARS(faltan) + '</strong> más para cubrir ' + mesesFondoMeta + ' meses. Construí este colchón antes de cualquier inversión.';
+    }
+  }
+
+  // ── GASTOS POR CATEGORÍA ──
   var gasMovs = dm.filter(m => m.tipo === 'gasto');
   var catDiv = document.getElementById('resCatAnal');
   if (catDiv) {
-    if (!gasMovs.length) { catDiv.innerHTML = '<div class="empty"><div class="icon">📊</div>Sin gastos este mes.</div>'; return; }
-    var tots = {}; gasMovs.forEach(m => { var k = m.subcat || m.cat; tots[k] = (tots[k]||0) + m.importeARS; });
-    var max = Math.max(...Object.values(tots));
-    var cols = ['#1D9E75','#5DCAA5','#185FA5','#D85A30','#BA7517','#D4537E','#7F77DD','#888780','#9FE1CB','#378ADD','#EF9F27'];
-    catDiv.innerHTML = Object.entries(tots).sort((a,b) => b[1]-a[1]).map(([cat,val],i) =>
-      '<div class="cat-row"><span class="cat-nombre">' + cat + '</span>' +
-      '<div class="cat-barra-wrap"><div class="cat-barra" style="width:' + Math.round((val/max)*100) + '%;background:' + cols[i%cols.length] + '"></div></div>' +
-      '<span class="cat-monto">' + fARS(val) + '</span></div>'
-    ).join('');
+    if (!gasMovs.length) { catDiv.innerHTML = '<div class="empty"><div class="icon">📊</div>Sin gastos este mes.</div>'; }
+    else {
+      var tots = {}; gasMovs.forEach(m => { var k = m.subcat || m.cat; tots[k] = (tots[k]||0) + m.importeARS; });
+      var max = Math.max(...Object.values(tots));
+      var cols = ['#1D9E75','#5DCAA5','#185FA5','#D85A30','#BA7517','#D4537E','#7F77DD','#888780','#9FE1CB','#378ADD','#EF9F27'];
+      catDiv.innerHTML = Object.entries(tots).sort((a,b) => b[1]-a[1]).map(([cat,val],i) =>
+        '<div class="cat-row"><span class="cat-nombre">' + cat + '</span>' +
+        '<div class="cat-barra-wrap"><div class="cat-barra" style="width:' + Math.round((val/max)*100) + '%;background:' + cols[i%cols.length] + '"></div></div>' +
+        '<span class="cat-monto">' + fARS(val) + '</span></div>'
+      ).join('');
+    }
   }
+
+  // ── COMPARACIÓN VS MES ANTERIOR ──
+  var compTit = document.getElementById('compTitulo');
+  var compCard = document.getElementById('compCard');
+  if (hayAnt && gasMovs.length) {
+    var totsAnt = {};
+    dma.filter(m => m.tipo === 'gasto').forEach(m => { var k = m.subcat || m.cat; totsAnt[k] = (totsAnt[k]||0) + m.importeARS; });
+    var totsAct = {}; gasMovs.forEach(m => { var k = m.subcat || m.cat; totsAct[k] = (totsAct[k]||0) + m.importeARS; });
+    var todasCats = [...new Set([...Object.keys(totsAct), ...Object.keys(totsAnt)])];
+    var rows = todasCats.sort((a,b) => (totsAct[b]||0)-(totsAct[a]||0)).map(cat => {
+      var act = totsAct[cat]||0, ant = totsAnt[cat]||0, diff = act - ant;
+      var pctD = ant > 0 ? Math.round((diff/ant)*100) : (act > 0 ? 100 : 0);
+      var cls = diff === 0 ? 'igual' : diff > 0 ? 'sube' : 'baja';
+      var arrow = diff === 0 ? '' : diff > 0 ? '▲' : '▼';
+      return '<div class="comp-row"><span class="comp-cat">' + cat + '</span>' +
+        '<span class="comp-val">' + fARS(act) + '</span>' +
+        '<span class="comp-delta ' + cls + '">' + (ant > 0 ? arrow + ' ' + Math.abs(pctD) + '%' : act > 0 ? 'Nuevo' : '—') + '</span></div>';
+    }).join('');
+    document.getElementById('compRows').innerHTML = rows;
+    if (compTit) compTit.style.display = 'block';
+    if (compCard) compCard.style.display = 'block';
+  } else {
+    if (compTit) compTit.style.display = 'none';
+    if (compCard) compCard.style.display = 'none';
+  }
+
+  // ── INVERSIONES DINÁMICAS ──
+  renderInversiones(saldo, pct, pctFondo);
+}
+
+function renderInversiones(saldo, pctAhorro, pctFondo) {
+  var card = document.getElementById('invCard');
+  if (!card) return;
+  var meta = parseInt(localStorage.getItem('ff_meses_fondo') || '3');
+  var recomendaciones = [];
+
+  if (pctFondo < 100) {
+    recomendaciones.push({icon:'🛡️', bg:'#FAECE7',
+      titulo:'Completá el fondo primero',
+      desc:'Antes de invertir, priorizá tener ' + meta + ' meses de gastos guardados en una cuenta remunerada o caja de ahorro.',
+      riesgo:'b', lbl:'Prioridad'});
+  }
+  if (saldo > 0 && pctFondo >= 50) {
+    recomendaciones.push({icon:'💵', bg:'#FAECE7',
+      titulo:'Dólar MEP / billete',
+      desc:'Convertí al menos el 20% del ahorro (' + fARS(saldo * 0.2) + ') a dólares. Cobertura clave contra devaluación.',
+      riesgo:'b', lbl:'Riesgo bajo'});
+  }
+  if (pctFondo >= 100) {
+    recomendaciones.push({icon:'📈', bg:'#E1F5EE',
+      titulo:'FCI Money Market',
+      desc:'Fondo completo ✓ Invertí el excedente en un Money Market para rendimiento con liquidez inmediata.',
+      riesgo:'b', lbl:'Riesgo bajo'});
+    recomendaciones.push({icon:'🏦', bg:'#FAEEDA',
+      titulo:'Plazo fijo UVA',
+      desc:'Para el ahorro que no vas a usar en 90+ días. Ajusta por inflación y protege el poder de compra.',
+      riesgo:'m', lbl:'Riesgo medio'});
+  }
+  recomendaciones.push({icon:'🏠', bg:'#E6F1FB',
+    titulo:'Propiedades en alquiler',
+    desc:'Ya tenés experiencia. Los alquileres ajustados por ICL/UVA son de las mejores coberturas en Argentina.',
+    riesgo:'b', lbl:'Riesgo bajo'});
+  if (pctAhorro >= 20 && pctFondo >= 100) {
+    recomendaciones.push({icon:'📊', bg:'#E1F5EE',
+      titulo:'CEDEARs',
+      desc:'Con ' + pctAhorro + '% de ahorro y fondo completo, podés destinar una parte a acciones globales en pesos.',
+      riesgo:'a', lbl:'Riesgo alto'});
+  }
+
+  card.innerHTML = recomendaciones.map(r =>
+    '<div class="inv-row"><div class="inv-icon" style="background:' + r.bg + '">' + r.icon + '</div>' +
+    '<div class="inv-info"><h5>' + r.titulo + '</h5><p>' + r.desc + '</p>' +
+    '<span class="pill ' + r.riesgo + '">' + r.lbl + '</span></div></div>'
+  ).join('');
 }
 
 function renderAnual() {
@@ -1208,8 +1436,10 @@ function cancelarVoz() {
 function guardarConfig() {
   tc = parseFloat(document.getElementById('cfgTC').value) || 1200;
   scriptUrl = document.getElementById('cfgScriptUrl').value.trim() || SCRIPT_URL;
+  var mf = parseInt(document.getElementById('cfgMesesFondo').value) || 3;
   localStorage.setItem('ff_tc', tc);
   localStorage.setItem('ff_script_url', scriptUrl);
+  localStorage.setItem('ff_meses_fondo', mf);
   alert('✅ Configuración guardada');
   calcResumen();
 }
