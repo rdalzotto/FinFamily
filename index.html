@@ -418,27 +418,23 @@ function setSyncStatus(e,t){document.getElementById('syncDot').className='sync-d
 function cargarDesdeSheets(){
   setSyncStatus('loading','Sincronizando...');
   calcResumen();renderTx();renderCatAnal();
-  var cbName='ff_cb_'+Date.now();
-  var sc=document.createElement('script');
-  var timer=setTimeout(function(){
-    setSyncStatus('err','Sin conexión — datos locales');
-    delete window[cbName];
-    try{document.head.removeChild(sc);}catch(e){}
-  },15000);
-  window[cbName]=function(data){
-    clearTimeout(timer);
-    delete window[cbName];
-    try{document.head.removeChild(sc);}catch(e){}
-    if(data&&data.movimientos){
-      var smRaw=data.movimientos.map(m=>({...m,id:parseInt(m.id)||m.id,importe:parseFloat(m.importe)||0,importeARS:parseFloat(m.importeARS)||0,icon:getIcon(m.catId,m.cat)}));
-      var visto={};var sm=smRaw.filter(m=>{var k=m.id+'|'+(m.fecha||'');if(visto[k])return false;visto[k]=true;return true;});
-      if(sm.length>=movs.length){movs=sm;localStorage.setItem('ff_movs',JSON.stringify(movs));calcResumen();renderTx();renderCatAnal();}
-      setSyncStatus('ok','Sincronizado ✓');
-    }
-  };
-  sc.onerror=function(){clearTimeout(timer);setSyncStatus('err','Sin conexión — datos locales');delete window[cbName];};
-  sc.src=scriptUrl+'?callback='+cbName;
-  document.head.appendChild(sc);
+  fetch(scriptUrl,{redirect:'follow'})
+    .then(r=>r.text())
+    .then(txt=>{
+      // Puede venir como JSON puro o como JSONP - manejamos ambos
+      var data;
+      try{data=JSON.parse(txt);}catch(e){
+        var m=txt.match(/\{.*\}/s);
+        if(m)try{data=JSON.parse(m[0]);}catch(e2){}
+      }
+      if(data&&data.movimientos){
+        var smRaw=data.movimientos.map(m=>({...m,id:parseInt(m.id)||m.id,importe:parseFloat(m.importe)||0,importeARS:parseFloat(m.importeARS)||0,icon:getIcon(m.catId,m.cat)}));
+        var visto={};var sm=smRaw.filter(m=>{var k=m.id+'|'+(m.fecha||'');if(visto[k])return false;visto[k]=true;return true;});
+        if(sm.length>=movs.length){movs=sm;localStorage.setItem('ff_movs',JSON.stringify(movs));calcResumen();renderTx();renderCatAnal();}
+        setSyncStatus('ok','Sincronizado ✓');
+      }
+    })
+    .catch(()=>{setSyncStatus('err','Sin conexión — datos locales');});
 }
 function enviarASheets(action,data){return fetch(scriptUrl,{method:'POST',body:JSON.stringify({action,...data}),headers:{'Content-Type':'text/plain'}}).then(r=>r.json());}
 function getIcon(catId,cat){for(var g of[...ESTRUCTURA_GASTOS,...ESTRUCTURA_INGRESOS]){for(var s of g.subs){if(s.id===catId)return g.icon;}if(cat&&cat.includes(g.cat.split(' ')[0]))return g.icon;}return '📌';}
