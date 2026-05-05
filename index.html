@@ -386,15 +386,25 @@ let usuarioActual='',rolActual='',mesOffset=0;
 
 // CORRECCION FECHA: soporta DD/MM/AAAA (Google Sheets Argentina) y AAAA-MM-DD (ISO)
 function parseFecha(s){
-  if(!s||s==='')return null; // fecha vacía = null (ignorar el movimiento)
+  if(!s||s==='')return null;
   s=String(s).trim();
-  // Formato argentino DD/MM/AAAA
-  if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)){var p=s.split('/');return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));}
-  // Formato ISO con hora: 2026-04-02T03:00:00.000Z → extraer solo la parte de fecha
-  if(/^\d{4}-\d{2}-\d{2}T/.test(s)){var f=s.substring(0,10);return new Date(f+'T12:00:00');}
-  // Formato ISO simple AAAA-MM-DD
-  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return new Date(s+'T12:00:00');
-  var d=new Date(s);return isNaN(d)?null:d;
+  // Formato argentino DD/MM/AAAA o D/M/AAAA
+  if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)){
+    var p=s.split('/');
+    return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+  }
+  // Formato ISO con hora: 2026-04-02T03:00:00.000Z
+  if(/^\d{4}-\d{2}-\d{2}T/.test(s)){
+    var p=s.substring(0,10).split('-');
+    return new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));
+  }
+  // Formato ISO simple AAAA-MM-DD (como guarda la app localmente)
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
+    var p=s.split('-');
+    return new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));
+  }
+  var d=new Date(s);
+  return isNaN(d.getTime())?null:d;
 }
 function fFecha(s){var d=parseFecha(s);return d?d.toLocaleDateString('es-AR',{day:'numeric',month:'short'}):'Sin fecha';}
 
