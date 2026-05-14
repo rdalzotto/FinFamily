@@ -815,26 +815,52 @@ function cargarDesdeSheets() {
   })
   .then(data => {
     if (data && data.movimientos && Array.isArray(data.movimientos)) {
-      var visto = {};
+      // Normalizar registros de Sheets
       var sm = data.movimientos.map(m => ({
         ...m,
-        id: parseInt(m.id) || m.id,
+        id: String(m.id).trim(),   // Normalizar IDs como strings
         importe: parseFloat(m.importe) || 0,
         importeARS: parseFloat(m.importeARS) || 0,
         icon: getIcon(m.catId, m.cat)
-      })).filter(m => {
-        var k = m.id + '|' + (m.fecha || '');
-        if (visto[k]) return false;
-        visto[k] = true;
+      }));
+
+      // Normalizar IDs locales también a string para comparar
+      var locales = movs.map(m => ({...m, id: String(m.id).trim()}));
+
+      // Construir mapa de IDs de Sheets
+      var idsSheets = new Set(sm.map(m => m.id));
+      var idsLocales = new Set(locales.map(m => m.id));
+
+      // Registros locales que Sheets NO tiene todavía (recién cargados, sin sync aún)
+      var soloLocales = locales.filter(m => !idsSheets.has(m.id));
+
+      // Merge: todos los de Sheets + los locales nuevos que Sheets aún no tiene
+      var merged = [...sm, ...soloLocales];
+
+      // Deduplicar por ID (por las dudas)
+      var vistos = new Set();
+      merged = merged.filter(m => {
+        if (vistos.has(m.id)) return false;
+        vistos.add(m.id);
         return true;
       });
-      // Solo sobreescribir locales si Sheets tiene igual o más registros
-      if (sm.length >= movs.length) {
-        movs = sm;
-        localStorage.setItem('ff_movs', JSON.stringify(movs));
-        calcResumen(); renderTx(); renderCatAnal();
-      }
-      setSyncStatus('ok', 'Sincronizado ✓');
+
+      // Ordenar por fecha descendente (más recientes primero)
+      merged.sort((a, b) => {
+        var da = parseFecha(a.fecha), db = parseFecha(b.fecha);
+        if (!da && !db) return 0;
+        if (!da) return 1;
+        if (!db) return -1;
+        var diff = db - da;
+        if (diff !== 0) return diff;
+        // Mismo día: ordenar por ID numérico descendente
+        return Number(b.id) - Number(a.id);
+      });
+
+      movs = merged;
+      localStorage.setItem('ff_movs', JSON.stringify(movs));
+      calcResumen(); renderTx(); renderCatAnal();
+      setSyncStatus('ok', 'Sincronizado ✓ (' + movs.length + ' registros)');
     } else {
       setSyncStatus('err', 'Respuesta inesperada de Sheets');
     }
@@ -1199,7 +1225,7 @@ function guardar() {
   if (!catSel || isNaN(imp) || imp <= 0) { alert('Completá la categoría y el importe'); return; }
   var info = getSubcatInfo(catSel);
   var mov = {
-    id: editId || Date.now(),
+    id: editId ? String(editId) : String(Date.now()),
     tipo, catId: catSel, cat: info.cat, subcat: info.subcat, icon: info.icon,
     detalle: document.getElementById('fDetalle').value || info.subcat,
     moneda, importe: imp,
@@ -1399,7 +1425,7 @@ function interpretarTexto(t) {
     if (tipo === 'gasto') { catId='alim_super'; subcat='Supermercado'; cat='Alimentación'; icon='🛒'; }
     else { catId='ing_oficina'; subcat='Oficina'; cat='Ingresos'; icon='💰'; }
   }
-  return {id: Date.now(), tipo, catId, cat, subcat, icon, detalle, moneda, importe, importeARS: moneda==='USD' ? importe*tc : importe, quien: usuarioActual, fecha: new Date().toISOString().split('T')[0]};
+  return {id: String(Date.now()), tipo, catId, cat, subcat, icon, detalle, moneda, importe, importeARS: moneda==='USD' ? importe*tc : importe, quien: usuarioActual, fecha: new Date().toISOString().split('T')[0]};
 }
 
 function confirmarVoz() {
