@@ -465,6 +465,7 @@ input,select,button{font-family:inherit;}
         <input type="text" class="form-input" id="cfgScriptUrl" style="font-size:11px;margin-top:6px">
         <button class="save-btn" onclick="guardarConfig()">Guardar configuración</button>
         <button class="save-btn" style="margin-top:8px;background:#185FA5" onclick="forzarSync()">🔄 Forzar sincronización</button>
+        <button class="save-btn" style="margin-top:8px;background:#BA7517" onclick="eliminarDuplicados()">🧹 Eliminar registros duplicados</button>
       </div>
       <div class="sec-title">📱 Instalar en Android</div>
       <div class="cfg-card">
@@ -968,8 +969,8 @@ function renderTx() {
     '<div class="tx-val ' + m.tipo + '">' + (m.tipo === 'gasto' ? '−' : '+') + fNum(m.importe) + ' ' + m.moneda + '</div>' +
     (m.moneda === 'USD' ? '<div class="tx-cur">' + fARS(m.importeARS) + '</div>' : '') +
     '<div class="tx-actions">' +
-    '<button class="tx-btn ed" onclick="openModal(' + m.id + ')">✏️</button>' +
-    (rolActual === 'admin' ? '<button class="tx-btn del" onclick="eliminar(' + m.id + ')">🗑️</button>' : '') +
+    '<button class="tx-btn ed" onclick="openModal(\'' + m.id + '\')">✏️</button>' +
+    (rolActual === 'admin' ? '<button class="tx-btn del" onclick="eliminar(\'' + m.id + '\')">🗑️</button>' : '') +
     '</div></div></div>'
   ).join('');
 }
@@ -1233,7 +1234,7 @@ function guardar() {
     quien: usuarioActual,
     fecha: document.getElementById('fFecha').value
   };
-  if (editId) movs = movs.map(m => m.id === editId ? mov : m);
+  if (editId) movs = movs.map(m => String(m.id) === String(editId) ? mov : m);
   else movs.unshift(mov);
   localStorage.setItem('ff_movs', JSON.stringify(movs));
   closeModal(); calcResumen(); renderTx(); renderCatAnal();
@@ -1243,9 +1244,31 @@ function guardar() {
     .catch(() => setSyncStatus('err', 'Error al guardar'));
 }
 
+function eliminarDuplicados() {
+  var vistos = {};
+  var antes = movs.length;
+  movs = movs.filter(m => {
+    var k = (m.fecha||'') + '|' + (m.importe||0) + '|' + (m.catId||'') + '|' + (m.quien||'');
+    if (vistos[k]) return false;
+    vistos[k] = true;
+    return true;
+  });
+  var eliminados = antes - movs.length;
+  localStorage.setItem('ff_movs', JSON.stringify(movs));
+  calcResumen(); renderTx(); renderCatAnal();
+  if (eliminados > 0) {
+    alert('✅ Se eliminaron ' + eliminados + ' duplicados. Quedan ' + movs.length + ' movimientos.');
+    setSyncStatus('loading', 'Actualizando...');
+    cargarDesdeSheets();
+  } else {
+    alert('✅ No hay duplicados. Todo limpio.');
+  }
+}
+
 function eliminar(id) {
+  id = String(id);
   if (!confirm('¿Eliminar este movimiento?')) return;
-  movs = movs.filter(m => m.id !== id);
+  movs = movs.filter(m => String(m.id) !== id);
   localStorage.setItem('ff_movs', JSON.stringify(movs));
   calcResumen(); renderTx(); renderCatAnal();
   setSyncStatus('loading', 'Eliminando...');
